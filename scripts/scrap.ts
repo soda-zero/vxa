@@ -202,26 +202,27 @@ export interface Extensions {
 
 const INSTAGRAM_APP_ID = "936619743392459";
 
-async function scrape_user(username: string) {
-  const headers = {
-    "User-Agent":
-      "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36",
-    "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
-    "Accept-Encoding": "gzip, deflate, br",
-    Accept: "*/*",
-    "x-ig-app-id": INSTAGRAM_APP_ID,
-  };
-
-  try {
-    const response = await axios.get(
-      `https://i.instagram.com/api/v1/users/web_profile_info/?username=${username}`,
-      { headers },
-    );
-    return response.data.data.user;
-  } catch (error) {
-    console.error("Error: ", error.message);
-  }
-}
+// async function scrape_user(username: string): Promise<any> {
+//   const headers = {
+//     "User-Agent":
+//       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36",
+//     "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+//     "Accept-Encoding": "gzip, deflate, br",
+//     Accept: "*/*",
+//     "x-ig-app-id": INSTAGRAM_APP_ID,
+//   };
+//
+//   try {
+//     const response = await axios.get(
+//       `https://i.instagram.com/api/v1/users/web_profile_info/?username=${username}`,
+//       { headers },
+//     );
+//     return response.data.data.user;
+//   } catch (error) {
+//     console.error("Error: ", error.message);
+//     throw error;
+//   }
+// }
 
 async function scrape_post(urlOrShortcode) {
   let shortcode = urlOrShortcode;
@@ -244,12 +245,12 @@ async function scrape_post(urlOrShortcode) {
     "https://www.instagram.com/graphql/query/?query_hash=b3055c01b4b222b8a47dc12b090e4e64&variables=";
 
   const result = await axios.get(
-    url +
-      encodeURIComponent(JSON.stringify(variables), {
-        headers: {
-          "x-ig-app-id": INSTAGRAM_APP_ID,
-        },
-      }),
+    url + encodeURIComponent(JSON.stringify(variables)),
+    {
+      headers: {
+        "x-ig-app-id": INSTAGRAM_APP_ID,
+      },
+    },
   );
 
   const data = result.data;
@@ -463,13 +464,13 @@ width: number;
   }
 }
 
-function parseUser(data) {
+function parseUser(data: any) {
   const parsedData = {
     name: data.full_name,
     username: data.username,
     id: data.id,
     bio: data.biography,
-    bio_links: (data.bio_links || []).map((link) => link.url),
+    bio_links: (data.bio_links || []).map((link: any) => link.url),
     homepage: data.external_url,
     profile_image: data.profile_pic_url_hd,
   };
@@ -478,5 +479,5 @@ function parseUser(data) {
 }
 
 // const post = await scrape_post("Cxy9i1lLXBP");
-scrape_user_posts("6877920009");
+// scrape_user_posts("6877920009");
 // parse_instagram_post(post);
