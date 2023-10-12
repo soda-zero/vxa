@@ -24,6 +24,7 @@ async function scrape_user(username) {
     console.error("Error: ", error.message);
   }
 }
+
 async function scrape_post(urlOrShortcode) {
   let shortcode = urlOrShortcode;
 
@@ -53,19 +54,11 @@ async function scrape_post(urlOrShortcode) {
       }),
   );
 
-  console.log(
-    url +
-      encodeURIComponent(JSON.stringify(variables), {
-        headers: {
-          "x-ig-app-id": INSTAGRAM_APP_ID,
-        },
-      }),
-  );
   const data = result.data;
-  console.log(data);
   return data.data.shortcode_media;
 }
 
+// Last time was page 70
 async function scrape_user_posts(user_id, page_size = 12) {
   const base_url =
     "https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables=";
@@ -79,7 +72,6 @@ async function scrape_user_posts(user_id, page_size = 12) {
   const parsedPosts = [];
   while (true) {
     const url = `${base_url}${encodeURIComponent(JSON.stringify(variables))}`;
-    console.log(url);
     try {
       const response = await axios.get(url);
       const data = response.data;
@@ -87,7 +79,7 @@ async function scrape_user_posts(user_id, page_size = 12) {
 
       for (const post of posts.edges) {
         const parsedPost = parse_instagram_post(post.node);
-        if (parsedPost.is_video === false) {
+        if (post.node.is_video === false) {
           parsedPosts.push(parsedPost);
         }
       }
@@ -110,18 +102,11 @@ async function scrape_user_posts(user_id, page_size = 12) {
 
       variables.after = page_info.end_cursor;
       _page_number++;
-      console.log(url);
     } catch (error) {
-      console.log(url);
       console.error("Error while scraping:", error);
       break;
     }
   }
-
-  // Write the parsed post data to a JSON file
-  const jsonFileName = "parsed_posts.json";
-  fs.writeFileSync(jsonFileName, JSON.stringify(parsedPosts, null, 2));
-  console.log(`Parsed post data written to ${jsonFileName}`);
 }
 
 async function downloadImage(url, dest) {
@@ -142,58 +127,138 @@ async function downloadImage(url, dest) {
 }
 
 function parse_instagram_post(data) {
-  // Create a folder for images
   const imageDir = "../public/images";
   if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir);
   }
 
-  // Sanitize the image filename
-  const imageUrl = data.display_url;
-  const imageFileName = `${data.shortcode}.jpg`;
-  const imageFilePath = path.join(imageDir, imageFileName);
+  if (data.is_video === false) {
+    const imageUrl = data.display_url;
+    const imageFileName = `${data.shortcode}.jpg`;
+    const imageFilePath = path.join(imageDir, imageFileName);
 
-  downloadImage(imageUrl, imageFilePath)
-    .then(() => {
-      console.log(`Image downloaded and saved to ${imageFilePath}`);
+    const captions = data.edge_media_to_caption.edges.map(
+      (edge) => edge.node.text,
+    );
 
-      const parsedData = {
-        id: data.id,
-        shortcode: data.shortcode,
-        dimensions: data.dimensions,
-        img_src: imageFilePath, // Set img_src to the downloaded image path
-        is_video: data.is_video,
-        captions: data.edge_media_to_caption.edges.map(
-          (edge) => edge.node.text,
-        ),
-      };
+    let title = "";
+    const tags = [];
 
-      // Write the parsed data to a JavaScript file
-      const jsData = `export type Posts = Post[];
-                        export interface Post {
-                          id: string;
-                          shortcode: string;
-                          dimensions: Dimensions;
-                          display_url: string;
-                          is_video: boolean;
-                          captions: string[];
-                    }
+    if (captions.length > 0) {
+      const firstCaption = captions[0];
+      const firstHashIndex = firstCaption.indexOf("#");
+      if (firstHashIndex !== -1) {
+        title = firstCaption.substring(0, firstHashIndex).trim(); // Extract text before the first "#"
+        const remainingCaption = firstCaption.substring(firstHashIndex);
 
-export interface Dimensions {
-  height: number;
-  width: number;
+        // Extract tags from the remaining part of the caption
+        const tagMatches = remainingCaption.match(/#(\w+)/g);
+        if (tagMatches) {
+          tags.push(...tagMatches.map((tag) => tag.substring(1))); // Extract tags without the #
+        }
+      } else {
+        // If there is no "#" symbol, use the whole caption as the title
+        title = firstCaption;
+      }
+    }
+    downloadImage(imageUrl, imageFilePath)
+      .then(() => {
+        if (!fs.existsSync(imageFilePath)) {
+          console.log(`Image downloaded and saved to ${imageFilePath}`);
+        } else {
+          console.log(`Image already exists at ${imageFilePath}`);
+        }
+
+        const parsedData = {
+          id: data.id,
+          title: title,
+          tags: tags.join(" "),
+          shortcode: data.shortcode,
+          created_at: data.taken_at_timestamp,
+          dimensions: data.dimensions,
+          img_src: `/images/${imageFileName}`, // Set img_src to the downloaded image path
+        };
+
+        // Write the parsed data to a JavaScript file
+        const types = `
+export type Posts = Post[];
+export interface Post {
+id: string;
+title: string,
+tags: string;
+created_at: string;
+shortcode: string;
+dimensions: Dimensions;
+img_src: string;
 }
 
-export const posts: Posts = ${JSON.stringify(
-        parsedData,
-        null,
-        2,
-      )};\nmodule.exports = parsedData;`;
-      fs.writeFileSync("../src/types/data.ts", jsData);
-    })
-    .catch((error) => {
-      console.error(`Error downloading image: ${error.message}`);
-    });
+export interface Dimensions {
+height: number;
+width: number;
+}
+`;
+
+        const types_folder = "../src/types";
+        const data_folder = "../src/data";
+
+        if (!fs.existsSync(types_folder)) {
+          fs.mkdirSync(types_folder);
+        }
+
+        if (!fs.existsSync(data_folder)) {
+          fs.mkdirSync(data_folder);
+        }
+        // Read the existing data from the data file
+        const dataFilePath = "../src/data/posts_data.json";
+
+        if (fs.existsSync(dataFilePath)) {
+          fs.readFile(dataFilePath, "utf8", (err, dataFromFile) => {
+            if (err) {
+              console.error(`Error reading existing data: ${err.message}`);
+              return;
+            }
+
+            // Parse the existing data
+            const existingPosts = JSON.parse(
+              dataFromFile.slice(dataFromFile.indexOf("[")),
+            );
+            // Check if a post with the same shortcode exists
+            const existingPostIndex = existingPosts.findIndex(
+              (post) => post.shortcode === parsedData.shortcode,
+            );
+            if (existingPostIndex === -1) {
+              // Append the new post data
+              existingPosts.push(parsedData);
+
+              // Update the posts_data variable
+              const updatedPostsData = `${JSON.stringify(
+                existingPosts,
+                null,
+                2,
+              )}`;
+              // Write the updated data back to the file
+              fs.writeFile(dataFilePath, updatedPostsData, (err) => {
+                if (err) {
+                  console.error(`Error writing updated data: ${err.message}`);
+                } else {
+                  console.log("New post added and data updated.");
+                }
+              });
+            }
+          });
+        } else {
+          // Create a new 'posts_data.json' file with the initial data
+          const initialData = `[${JSON.stringify(parsedData, null, 2)}]`;
+
+          fs.writeFileSync(dataFilePath, initialData);
+          console.log("New data file created with the initial post data.");
+        }
+        fs.writeFileSync("../src/types/posts.ts", types);
+      })
+      .catch((error) => {
+        console.error(`Error downloading image: ${error.message}`);
+      });
+  }
 }
 
 function parseUser(data) {
@@ -210,7 +275,6 @@ function parseUser(data) {
   return parsedData;
 }
 
+const post = await scrape_post("Cxy9i1lLXBP");
 // scrape_user_posts("6877920009");
-const post = await scrape_post("Cwyh700LPvy");
 parse_instagram_post(post);
-
