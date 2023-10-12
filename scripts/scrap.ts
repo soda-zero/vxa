@@ -224,7 +224,7 @@ const INSTAGRAM_APP_ID = "936619743392459";
 //   }
 // }
 
-async function scrape_post(urlOrShortcode) {
+async function scrape_post(urlOrShortcode: string) {
   let shortcode = urlOrShortcode;
 
   if (urlOrShortcode.includes("http")) {
