@@ -1,14 +1,16 @@
 "use client";
-import { posts } from "@/types/mock_data";
+import { Posts } from "@/types/posts";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChangeEvent } from "react";
+import postsData from "../data/posts_data.json";
 
 export default function SearchInput() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search");
   const router = useRouter();
+  const posts: Posts = postsData as Posts;
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const newSearchQuery = event.target.value;
@@ -20,9 +22,7 @@ export default function SearchInput() {
 
   const filteredPosts = searchQuery
     ? posts.filter((post) =>
-        post.captions.some((caption) =>
-          caption.toLowerCase().includes(searchQuery.toLowerCase()),
-        ),
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()),
       )
     : posts;
 

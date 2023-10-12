@@ -2,9 +2,207 @@ import axios from "axios";
 import fs from "fs";
 import path from "path";
 
+export interface Root {
+  data: Data;
+  extensions: Extensions;
+  status: string;
+}
+
+export interface Data {
+  user: User;
+}
+
+export interface User {
+  edge_owner_to_timeline_media: EdgeOwnerToTimelineMedia;
+}
+
+export interface EdgeOwnerToTimelineMedia {
+  count: number;
+  page_info: PageInfo;
+  edges: Edge[];
+}
+
+export interface PageInfo {
+  has_next_page: boolean;
+  end_cursor: string;
+}
+
+export interface Edge {
+  node: Post;
+}
+
+export interface Post {
+  __typename: string;
+  id: string;
+  dimensions: Dimensions;
+  display_url: string;
+  display_resources: DisplayResource[];
+  is_video: boolean;
+  tracking_token: string;
+  edge_media_to_tagged_user: EdgeMediaToTaggedUser;
+  dash_info?: DashInfo;
+  video_url?: string;
+  video_view_count?: number;
+  edge_media_to_caption: EdgeMediaToCaption;
+  shortcode: string;
+  edge_media_to_comment: EdgeMediaToComment;
+  edge_media_to_sponsor_user: EdgeMediaToSponsorUser;
+  comments_disabled: boolean;
+  taken_at_timestamp: number;
+  edge_media_preview_like: EdgeMediaPreviewLike;
+  gating_info: any;
+  fact_check_overall_rating: any;
+  fact_check_information: any;
+  media_preview?: string;
+  owner: Owner2;
+  location: any;
+  viewer_has_liked: boolean;
+  viewer_has_saved: boolean;
+  viewer_has_saved_to_collection: boolean;
+  viewer_in_photo_of_you: boolean;
+  viewer_can_reshare: boolean;
+  thumbnail_src: string;
+  thumbnail_resources: ThumbnailResource[];
+  accessibility_caption: any;
+  edge_sidecar_to_children?: EdgeSidecarToChildren;
+}
+
+export interface Dimensions {
+  height: number;
+  width: number;
+}
+
+export interface DisplayResource {
+  src: string;
+  config_width: number;
+  config_height: number;
+}
+
+export interface EdgeMediaToTaggedUser {
+  edges: any[];
+}
+
+export interface DashInfo {
+  is_dash_eligible: boolean;
+  video_dash_manifest: string;
+  number_of_qualities: number;
+}
+
+export interface EdgeMediaToCaption {
+  edges: Edge2[];
+}
+
+export interface Edge2 {
+  node: Node2;
+}
+
+export interface Node2 {
+  text: string;
+}
+
+export interface EdgeMediaToComment {
+  count: number;
+  page_info: PageInfo2;
+  edges: Edge3[];
+}
+
+export interface PageInfo2 {
+  has_next_page: boolean;
+  end_cursor?: string;
+}
+
+export interface Edge3 {
+  node: Node3;
+}
+
+export interface Node3 {
+  id: string;
+  text: string;
+  created_at: number;
+  did_report_as_spam: boolean;
+  owner: Owner;
+  viewer_has_liked: boolean;
+}
+
+export interface Owner {
+  id: string;
+  is_verified: boolean;
+  profile_pic_url: string;
+  username: string;
+}
+
+export interface EdgeMediaToSponsorUser {
+  edges: any[];
+}
+
+export interface EdgeMediaPreviewLike {
+  count: number;
+  edges: Edge4[];
+}
+
+export interface Edge4 {
+  node: Node4;
+}
+
+export interface Node4 {
+  id: string;
+  profile_pic_url: string;
+  username: string;
+}
+
+export interface Owner2 {
+  id: string;
+  username: string;
+}
+
+export interface ThumbnailResource {
+  src: string;
+  config_width: number;
+  config_height: number;
+}
+
+export interface EdgeSidecarToChildren {
+  edges: Edge5[];
+}
+
+export interface Edge5 {
+  node: Node5;
+}
+
+export interface Node5 {
+  __typename: string;
+  id: string;
+  dimensions: Dimensions2;
+  display_url: string;
+  display_resources: DisplayResource2[];
+  is_video: boolean;
+  tracking_token: string;
+  edge_media_to_tagged_user: EdgeMediaToTaggedUser2;
+  accessibility_caption: any;
+}
+
+export interface Dimensions2 {
+  height: number;
+  width: number;
+}
+
+export interface DisplayResource2 {
+  src: string;
+  config_width: number;
+  config_height: number;
+}
+
+export interface EdgeMediaToTaggedUser2 {
+  edges: any[];
+}
+
+export interface Extensions {
+  is_final: boolean;
+}
+
 const INSTAGRAM_APP_ID = "936619743392459";
 
-async function scrape_user(username) {
+async function scrape_user(username: string) {
   const headers = {
     "User-Agent":
       "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36",
@@ -59,7 +257,7 @@ async function scrape_post(urlOrShortcode) {
 }
 
 // Last time was page 70
-async function scrape_user_posts(user_id, page_size = 12) {
+async function scrape_user_posts(user_id: string, page_size = 12) {
   const base_url =
     "https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables=";
   let variables = {
@@ -109,7 +307,10 @@ async function scrape_user_posts(user_id, page_size = 12) {
   }
 }
 
-async function downloadImage(url, dest) {
+async function downloadImage(
+  url: string,
+  dest: string,
+): Promise<Root | undefined> {
   const writer = fs.createWriteStream(dest);
 
   const response = await axios({
@@ -126,7 +327,7 @@ async function downloadImage(url, dest) {
   });
 }
 
-function parse_instagram_post(data) {
+function parse_instagram_post(data: Post) {
   const imageDir = "../public/images";
   if (!fs.existsSync(imageDir)) {
     fs.mkdirSync(imageDir);
@@ -142,7 +343,7 @@ function parse_instagram_post(data) {
     );
 
     let title = "";
-    const tags = [];
+    const tags: string[] = [];
 
     if (captions.length > 0) {
       const firstCaption = captions[0];
@@ -186,7 +387,7 @@ export interface Post {
 id: string;
 title: string,
 tags: string;
-created_at: string;
+created_at: number;
 shortcode: string;
 dimensions: Dimensions;
 img_src: string;
@@ -224,7 +425,8 @@ width: number;
             );
             // Check if a post with the same shortcode exists
             const existingPostIndex = existingPosts.findIndex(
-              (post) => post.shortcode === parsedData.shortcode,
+              (post: typeof parsedData) =>
+                post.shortcode === parsedData.shortcode,
             );
             if (existingPostIndex === -1) {
               // Append the new post data
@@ -275,6 +477,6 @@ function parseUser(data) {
   return parsedData;
 }
 
-const post = await scrape_post("Cxy9i1lLXBP");
-// scrape_user_posts("6877920009");
-parse_instagram_post(post);
+// const post = await scrape_post("Cxy9i1lLXBP");
+scrape_user_posts("6877920009");
+// parse_instagram_post(post);
