@@ -479,5 +479,5 @@ function parseUser(data: any) {
 }
 
 // const post = await scrape_post("Cxy9i1lLXBP");
-// scrape_user_posts("6877920009");
+scrape_user_posts("6877920009");
 // parse_instagram_post(post);
