@@ -3,12 +3,10 @@
 @tailwind utilities;
 
 .squiggle {
-    filter: url("#squiggle");
-    position: relative;
-    transform: translateZ(0);
+  filter: url("#squiggle");
+  position: relative;
+  transform: translateZ(0);
 }
-
-
 
 /* custom scrollbar */
 ::-webkit-scrollbar {
