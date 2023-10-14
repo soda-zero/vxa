@@ -1,7 +1,6 @@
 import { Posts } from "@/types/posts";
 import Image from "next/image";
 import Link from "next/link";
-import { BrokenHIcon } from "./ui/icons";
 
 export default function Products({
   posts,
@@ -30,10 +29,7 @@ export default function Products({
       )}
       <div className="flex gap-4 flex-col p-4">
         {noProducts ? (
-          <p className="flex items-center  justify-center flex-col">
-            No se encontró ningún producto...
-            <BrokenHIcon />
-          </p>
+          <p>No se encontró ningún producto...</p>
         ) : (
           filteredPosts.map((post) => {
             const date = new Date(Number(post.created_at) * 1000);
@@ -59,6 +55,7 @@ export default function Products({
                       height={post.dimensions.height}
                       alt={`Imagen de: ${post.title}`}
                       className="w-[150px] aspect-[3/4] h-auto shadow-[5px_5px_0px_0px_rgba(16,185,19,0.5)] rounded object-cover"
+                      placeholder="blur"
                     />
                     <figcaption className="bg-inherit p-2">
                       <header className=" h-full w-full text-xl  group-hover/product:text-emerald-500">
