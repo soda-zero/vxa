@@ -258,7 +258,7 @@ async function scrape_post(urlOrShortcode: string) {
 }
 
 // Last time was page 70
-async function scrape_user_posts(user_id: string, page_size = 12) {
+async function scrape_user_posts(user_id: string, page_size = 70) {
   const base_url =
     "https://www.instagram.com/graphql/query/?query_hash=e769aa130647d2354c40ea6a439bfc08&variables=";
   let variables = {
@@ -266,7 +266,7 @@ async function scrape_user_posts(user_id: string, page_size = 12) {
     first: page_size,
     after: null,
   };
-  let _page_number = 1;
+  let _page_number = 70;
 
   const parsedPosts = [];
   while (true) {
