@@ -24,6 +24,7 @@ export default function Home({ searchParams }: Props) {
         <div className="w-full sm:px-10">
           <Search />
         </div>
+
         <div className="sm:px-12 w-full">
           <Products posts={posts} search={search} />
         </div>

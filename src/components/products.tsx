@@ -54,8 +54,9 @@ export default function Products({
                       width={post.dimensions.width}
                       height={post.dimensions.height}
                       alt={`Imagen de: ${post.title}`}
-                      className="w-[150px] aspect-[3/4] h-auto shadow-[5px_5px_0px_0px_rgba(16,185,19,0.5)] rounded object-cover"
                       placeholder="blur"
+                      blurDataURL="data:image/webp;base64,UklGRrICAABXRUJQVlA4WAoAAAAgAAAAdAAA6QAASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDggxAAAALALAJ0BKnUA6gA+7Xa3VqmnJSOgSAEwHYlpbt1fP4BACe16KvPAbtuR1mpbpq/nmh6U4i52fkP9++PflesNS7znKIDSOCqUSSNwTOtgfkRpQo2mn/DHLOvDiIVTllNbkAQ0K9lfYAD+h3v/8Wh/vZ/5WsdHSahrn5ONYYN33eaMbu2Q4kZc0neWeesP6EunwacdSuBG355QQjscyTyc4j1/tde1c7ZlPGSKIFZSEETQWCvL5BHZdxuV+dlgGFLB4sGoAAA="
+                      className="w-[150px] min-w-[150px] h-full aspect-[3/4] shadow-[5px_5px_0px_0px_rgba(16,185,19,0.5)] rounded object-cover"
                     />
                     <figcaption className="bg-inherit p-2">
                       <header className=" h-full w-full text-xl  group-hover/product:text-emerald-500">
