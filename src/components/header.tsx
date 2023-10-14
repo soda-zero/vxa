@@ -1,11 +1,11 @@
+import { londrina } from "@/libs/fonts";
+
 export default function Header() {
   return (
-    <header>
-      <h1>VEGANO POR ACCIDENTE</h1>
-      <p>
-        Buscar entre todos los productos de la pagian de instagram
-        @veganoporaccidente.arg
-      </p>
+    <header
+      className={`${londrina.className} font-bold text-6xl sm:text-8xl w-full h-fit text-center max-w-3xl py-4`}
+    >
+      VEGANO POR ACCIDENTE ARG
     </header>
   );
 }
