@@ -17,6 +17,10 @@ export default function RootLayout({
   return (
     <html lang="es-AR">
       <body className={inter.className}>
+        <div className="bg-red-400/40 p-8 text-2xl font-bold">
+          Proyecto muerto porque Instagram bloquea la forma de obtener los datos
+          y no pienso hacerlo manualmente. 🚧 🚧 🚧
+        </div>
         {children}
         <Squiggly />
       </body>

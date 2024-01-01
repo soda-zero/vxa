@@ -17,7 +17,7 @@ export default function Home({ searchParams }: Props) {
   const { search } = searchParams;
   return (
     <div className="w-full h-full mx-auto custom-scrollbar">
-      <Nav />
+      {/* <Nav /> */}
       <main className="h-full w-full max-w-5xl mx-auto p-3 flex items-center justify-between flex-col sm:overflow-y-scroll">
         <Header />
 
