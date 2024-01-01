@@ -133,8 +133,6 @@ async function scrape_user_posts(user_id, page_size = 12) {
 
         variables.after = page_info.end_cursor;
         _page_number++;
-      } else {
-        throw Error("The fetch failed omegalul");
       }
     } catch (error) {
       console.error("Error while scraping:", error);
